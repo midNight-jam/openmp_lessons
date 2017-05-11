@@ -45,11 +45,8 @@ void serial_loop(){
 	}
 
 	high_resolution_clock::time_point end = high_resolution_clock::now();
-
 	auto exec_time = duration_cast<microseconds>(end - start).count();
-
 	cout << endl << " Serail microseconds : " << exec_time << endl;
-
 	return;
 }
 
