@@ -54,8 +54,45 @@ void serial_loop(){
 }
 
 
+
+void single_loop(){
+	
+	//start
+	high_resolution_clock::time_point start = high_resolution_clock::now();
+
+	#pragma omp parallel
+	{
+		#pragma omp single
+		{
+			int num_T = omp_get_num_threads();
+			int num_P = omp_get_num_procs();
+			int max_T = omp_get_max_threads();
+
+			cout << "num threads : " << num_T << endl;
+			cout << "num Process : " << num_P << endl;
+			cout << "max threads : " << max_T << endl;
+
+			for(int i, I  = omp_get_max_threads(); i < I; i++){
+				cout << " Hello ( " << i << " ) " << endl;  
+			}	
+		}
+	}
+	
+
+	high_resolution_clock::time_point end = high_resolution_clock::now();
+
+	auto exec_time = duration_cast<microseconds>(end - start).count();
+
+	cout << endl << " Single  microseconds : " << exec_time << endl;
+
+	return;
+
+}
+
+
 int main(int argc, char ** argv){
 	parallel_loop();
 	serial_loop();
+	single_loop();
 	return 0;
 }
