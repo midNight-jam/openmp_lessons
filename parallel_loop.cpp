@@ -90,9 +90,9 @@ void single_loop(){
 }
 
 
-int main(int argc, char ** argv){
-	parallel_loop();
-	serial_loop();
-	single_loop();
-	return 0;
+int main(int argc, char ** argv) {
+  parallel_loop();
+  serial_loop();
+  single_loop();
+  return 0;
 }
