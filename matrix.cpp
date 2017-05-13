@@ -8,8 +8,10 @@
 #include <math.h>
 #include <time.h>
 #include <omp.h>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 void createData(int const num_rows, int num_cols,
 				float * const a, float * const b,
@@ -36,9 +38,21 @@ int main() {
   c = (float *) malloc(N_BYTES);
   sol = (float *) malloc(N_BYTES);
 
+  high_resolution_clock::time_point start = high_resolution_clock::now();
+  
   createData(NUM_ROWS, NUM_COLS, a, b, c, sol);
+  
   add(NUM_ROWS, NUM_COLS, a, b, c);
 
+  checkSolution(NUM_ROWS, NUM_COLS, c, sol);
+
+
+  high_resolution_clock::time_point end = high_resolution_clock::now(); 
+
+  auto exec_time = duration_cast<microseconds>(end - start).count();
+
+  cout << endl << " Exec microseconds : " << exec_time << endl;
+  
   free(a);
   free(b);
   free(c);
@@ -55,8 +69,9 @@ void createData(int const num_rows, int num_cols,
   // int row, col;
   srand((unsigned) time(NULL));
 
-  //#pragma omp parallel
+  // #pragma omp parallel
   {
+  	// #pragma omp for
     for (int row = 0; row < num_rows; row++) {
       for (int col = 0; col < num_cols; col++) {
         int i = col + row * num_cols;
@@ -78,26 +93,32 @@ void checkSolution(int const num_rows, int num_cols,
   int const N = num_rows * num_cols;
   int different = 0;
 
-  for (int i = 0; i < N; i++) {
-    different = (a[i] != b[i]);
-    if (different) break;
+  // #pragma omp parallel
+  {
+	// #pragma omp for
+    for (int i = 0; i < N; i++) {
+	    different = (a[i] != b[i]);
+	    if (different) break;
+	  }
   }
-
   if (different)
-    printf("Arrays Do not match");
+    printf("Arrays Do not match FAILURE!!! \n");
   else
-    printf("Arrays match.. Success !!!");
+    printf("Arrays match.. Success !!! \n");
 }
 
 void add(int const num_rows, int num_cols,
 				float * const a, float * const b,
 				float * const c) {
-  for (int col = 0; col < num_cols; col++) {
-    for (int row = 0; row < num_rows; row++) {
-      int i = col + row * num_cols;
-      c[i] = a[i] + b[i];
-    }
-  }
-
+  // #pragma omp parallel
+  {		
+	  // #pragma omp for
+	  for (int col = 0; col < num_cols; col++) {
+	    for (int row = 0; row < num_rows; row++) {
+	      int i = col + row * num_cols;
+	      c[i] = a[i] + b[i];
+	    }
+	  }
+   }
   cout << "Addition Done ..." << endl;
 }
