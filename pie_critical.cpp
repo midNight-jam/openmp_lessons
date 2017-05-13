@@ -10,7 +10,7 @@ double step;
 
 int main(){
 	int i, nthreads;
-	double  pi, sum[NUM_THREADS]; // moving sum from scalar to vector 
+	double  pi;
 
 	step = 1.0 / (double) num_steps;
 	printf("Num of requested threads = %d \n", NUM_THREADS);	
@@ -21,7 +21,7 @@ int main(){
 	#pragma omp parallel
 	{
 		int i, id, nthrds;
-		double x;
+		double x, sum = 0.0;
 		id = omp_get_thread_num();
 		nthrds = omp_get_num_threads();
 		if(id == 0){
@@ -31,18 +31,16 @@ int main(){
 		
 
 
-		// assigining value only to the id ondex for that thread
-		// plus allocating only those cells of array following to thread folloeing num_threads gap
-		for(i = id, sum[id] = 0.0; i < num_steps; i = i + nthreads){
+		for(i = id; i < num_steps; i = i + nthreads){
 			x = (i + 0.5) * step;
-			sum[id] += 4.0/(1.0 + x*x);
+			sum += 4.0/(1.0 + x*x); // update each threads local sum
 		}
+
+		#pragma omp critical
+		pi += sum; // using the threads sum, beacuse once we move outside parallel threads local var are gone 
 	}
 
-	for(i = 0, pi = 0; i < nthreads; i++){
-		pi += sum[i] * step;
-	}	
-
+	pi = pi * step;
 
 	double Tend = omp_get_wtime();
 	double time = Tend - Tstart;
