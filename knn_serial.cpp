@@ -64,7 +64,7 @@ bool clustersMatch(list <int> lol_1 [], list <int> lol_2 [], int size){
 		}		
 		else{
 			cout << " Doesnt match , cluster match returning false" << endl;
-			return false;
+			match = false;
 		}
 	}
 
