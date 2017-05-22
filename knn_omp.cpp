@@ -4,6 +4,8 @@
 #include <random>
 #include <list>
 #include <iterator>
+#include <limits>
+#include <math.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -47,31 +49,10 @@ void printMatrix(int const num_rows, int num_cols,
 	for (int row = 0; row < num_rows; row++) {
       for (int col = 0; col < num_cols; col++) {
         int i = col + row * num_cols;
-        printf("%d,%d - %f\n", row, i, a[i]);
+        printf("  %d,%d - %f  ", row, i, a[i]);
      }
+     cout << endl;
     }
-}
-
-
-void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
-	int e = 0;
-	while(e < 3){ // epoch loop
-		int centroids [5]; 
-		random_device rd;
-		mt19937 eng(rd());
-		uniform_int_distribution<> distr(0,num_rows);
-		// selecting the random vectors as index
-		for(int n = 0; n < 5; n++){
-			centroids[n] = distr(eng); 
-			cout << " no : " << centroids[n] << endl;
-		}
-
-
-
-		e++;
-		cout << "Epoch ends" << endl;
-	}
-
 }
 
 
@@ -86,6 +67,95 @@ bool clustersMatch(list <int> lol_1 [], list <int> lol_2 [], int size){
 	}
 	return true;
 }
+
+float getPairwiseEuclideanDist(float * a, float * b, int size){
+	float dist = 0.0;
+	for(int i = 0; i < size; i++){
+		float sub = abs(a[i] - b[i]);
+		dist += pow(sub, 2); 
+	}
+
+	dist = sqrt(dist);
+	return dist;
+}
+
+void printCluster(list <int> lol_1 [], int size){
+for(int i = 0; i < size; i++){
+		for(list <int> :: iterator it1 = lol_1[i].begin(); it1 != lol_1[i].end(); ++it1){
+				cout << "cluster : "<< i <<" val  : " << *it1  << endl;
+			}		
+	}
+}
+
+void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
+	int e = 0;
+	list <int> old_cluster[5];
+
+	while(e < 3){ // epoch loop
+		list <int> new_cluster[5];
+		
+		int center_indexes [5]; 
+		random_device rd;
+		mt19937 eng(rd());
+		uniform_int_distribution<> distr(0,num_rows);
+		// selecting the random vectors as index
+		for(int n = 0; n < 5; n++){
+			center_indexes[n] = distr(eng); 
+			cout << " no : " << center_indexes[n] ;
+		}
+		cout <<  endl;
+
+		// sleecting 5 indexes as centroid , 5 cols are hard coded will remove
+		float centeroids[5][5];
+
+
+		// fetching the centroids data
+		for(int i = 0; i < 5; i++){
+			int row_num = center_indexes[i];
+			for(int j = 0; j < 5; j++){
+				centeroids[i][j] = mat[row_num*5 + j];
+			}
+		} 
+
+		for(int i =0 ; i< 5; i++){
+			cout << " cent : ";
+			for(int j = 0; j < 5; j++){
+				cout  << " " << centeroids[i][j];
+			}
+			cout << endl;
+		}
+		 
+		 
+		// for each point, calculate its distance with the centroids & keep track of closes centroid
+		float data[5]; // as 5 cols, taking the values out in a seperate array for dist calculation purpose
+		float minDist;
+		int cluster_no = 0;
+		for(int row = 0; row < num_rows; row++){
+			 minDist = numeric_limits<float>::max();
+			for(int col = 0; col < 5; col++){
+				int index  = col + row * 5;
+				data [col] = mat[index];
+			}
+			// got the data, now calculate distance 
+			cout << "\n-------------row : " << row << "-------------" <<endl;
+			for(int i = 0; i < 5; i++){
+				float dist = getPairwiseEuclideanDist(data, centeroids[i], 5);
+				if(dist < minDist){
+					minDist = dist;
+					cluster_no = i;
+					// cout << "\n new min dist : " << dist << " cluster : "<< cluster_no << endl;
+				}
+			}
+			new_cluster[cluster_no].push_back(row);
+			cout << " \n row " << row  << " goes to cluster " << cluster_no << " with min dist " << minDist;
+		}
+		printCluster(new_cluster, 5);
+		e++;
+		cout << "Epoch ends" << endl;
+	}
+
+}
+
 
 void try_list(){
 	list <int> listOfList [1] ;
@@ -126,17 +196,16 @@ int main(int argc, char ** argv) {
   cout<<"Ready... for KNN OMP"<<endl;
   
   float *a;
-  int const NUM_ROWS = 20;
-  int const NUM_COLS = 20;
+  int const NUM_ROWS = 10;
+  int const NUM_COLS = 5;
   int k = 5;
   size_t const N_BYTES = NUM_ROWS * NUM_COLS * sizeof(float);
   a = (float *) malloc(N_BYTES);
-  // createData(NUM_ROWS, NUM_COLS, a);
-  // printMatrix(NUM_ROWS, NUM_COLS, a);
-  // K_Means_Pairwise(a, NUM_ROWS, NUM_COLS);
+  createData(NUM_ROWS, NUM_COLS, a);
+  printMatrix(NUM_ROWS, NUM_COLS, a);
+  K_Means_Pairwise(a, NUM_ROWS, NUM_COLS);
 
-  try_list();
-
+  
   free(a);
   return 0;
 }
