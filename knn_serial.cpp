@@ -11,21 +11,6 @@
 using namespace std;
 using namespace std::chrono;
 
-// taking 5 clusters
-
-// int * getKRandomCentroidsIndex(int low, int high, int k){
-// 	int centroids [5];  
-// 	random_device rd;
-// 	mt19937 eng(rd());
-// 	uniform_int_distribution<> distr(low,high);
-// 	for(int n = 0; n < 5; n++){
-// 		cout << " no : " << distr(eng) << endl;
-// 		centroids[n] = distr(eng); 
-// 	}
-// 	cout << " clusters : " << k << endl;
-// 	return centroids;
-// }
-
 void createData(int const num_rows, int num_cols,
 				float * const a) {
 
@@ -68,13 +53,13 @@ bool clustersMatch(list <int> lol_1 [], list <int> lol_2 [], int size){
 		list <int> :: iterator it2 = lol_2[i].begin();
 
 		for(; it1 != lol_1[i].end() && it2 != lol_2[i].end(); ++it1, ++it2){
-				cout << " cluster old : " << *it1  << " cluster : " << *it2 << " K : " << i << endl;
+				cout << " cluster old : " << *it1  << " cluster new : " << *it2 << " K : " << i << endl;
 				if(*it1 != *it2){
 					match = false;
 				}
 			}
 		if( it1 == lol_1[i].end() && it2 == lol_2[i].end() && match == true){
-			cout << "Size & content matches for cluster : " << i << "continuing " <<  endl;  
+			cout << "Size & content matches for cluster : " << i << " continuing " <<  endl;  
 			continue;
 		}		
 		else{
@@ -239,43 +224,6 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 }
 
 
-void try_list(){
-	list <int> listOfList [1] ;
-	
-	list <int> mylist;
-	for(int i=0; i<5; i++){
-		mylist.push_back(i);
-		mylist.push_front(i * 3);
-
-		listOfList[0].push_back(i);
-		listOfList[0].push_front(i * 3);
-	}
-
-
-	list <int> listOfList2 [1] ;
-	
-	for(int i=0; i<4; i++){
-		listOfList2[0].push_back(i);
-		listOfList2[0].push_front(i * 3);
-	}
-	list <int> :: iterator it;
-
-
-
-	for(it = listOfList[0].begin(); it != listOfList[0].end(); ++it){
-		cout << " val : " << *it << endl;
-	}
-
-	bool res = clustersMatch(listOfList, listOfList2, 1);
-
-	cout << "Amtch results : " <<res << endl; 
-
-	bool dinal  = listOfList == listOfList2;
-	cout << "Fianl results : " <<dinal << endl; 
-
-}
-
-
 int main(int argc, char ** argv) {
   cout<<"Ready... for KNN Serial"<<endl;
   
@@ -289,14 +237,14 @@ int main(int argc, char ** argv) {
   double Tstart = omp_get_wtime();
   
   createData(NUM_ROWS, NUM_COLS, a);
-  printMatrix(NUM_ROWS, NUM_COLS, a);
+  // printMatrix(NUM_ROWS, NUM_COLS, a);
   K_Means_Pairwise(a, NUM_ROWS, NUM_COLS);
   
   double Tend = omp_get_wtime();
 
   free(a);
 
-
+  cout << "Clusters : " << k << " , docs : " << NUM_ROWS << " , Features : " << NUM_COLS << endl; 
   printf(" Time = %f secs \n", Tend - Tstart);			
   return 0;
 }
