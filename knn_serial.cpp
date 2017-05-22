@@ -277,7 +277,7 @@ void try_list(){
 
 
 int main(int argc, char ** argv) {
-  cout<<"Ready... for KNN OMP"<<endl;
+  cout<<"Ready... for KNN Serial"<<endl;
   
   float *a;
   int const NUM_ROWS = 100;
