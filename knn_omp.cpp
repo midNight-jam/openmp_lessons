@@ -57,17 +57,32 @@ void printMatrix(int const num_rows, int num_cols,
 
 
 bool clustersMatch(list <int> lol_1 [], list <int> lol_2 [], int size){
-	cout << " size 1 : " << sizeof(lol_1);
-	cout << " size 2 : " << sizeof(lol_2);
+	// cout << " size 1 : " << sizeof(lol_1);
+	// cout << " size 2 : " << sizeof(lol_2);
 	bool match = true;
+	cout <<"===========================================" << endl;		
+
 	for(int i = 0; i < size; i++){
-		for(list <int> :: iterator it1 = lol_1[i].begin(), it2 = lol_2[i].begin(); it1 != lol_1[i].end() || it2 != lol_2[i].end(); ++it1, ++it2){
-				cout << " val 1 : " << *it1  << " val 2 : " << *it2 << endl;
+		list <int> :: iterator it1 = lol_1[i].begin();
+		list <int> :: iterator it2 = lol_2[i].begin();
+
+		for(; it1 != lol_1[i].end() && it2 != lol_2[i].end(); ++it1, ++it2){
+				cout << " cluster old : " << *it1  << " cluster : " << *it2 << " K : " << i << endl;
 				if(*it1 != *it2){
 					match = false;
 				}
-			}		
+			}
+		if( it1 == lol_1[i].end() && it2 == lol_2[i].end() && match == true){
+			cout << "Size & content matches for cluster : " << i << "continuing " <<  endl;  
+			continue;
+		}		
+		else{
+			cout << " Doesnt match , cluster match returning false" << endl;
+			return false;
+		}
 	}
+
+	cout <<"===========================================" << endl;		
 	return match;
 }
 
@@ -95,8 +110,8 @@ for(int i = 0; i < size; i++){
 void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 	int e = 0;
 	list <int>  old_cluster[5];
-
-	while(e < 2){ // epoch loop
+	bool completeMatch = false;
+	while(!completeMatch){ // epoch loop
 		list <int> new_cluster[5];
 		
 		int center_indexes [5]; 
@@ -152,7 +167,7 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 				}
 			}
 			new_cluster[cluster_no].push_back(row);
-			cout << " \n row " << row  << " goes to cluster " << cluster_no << " with min dist " << minDist;
+			// cout << " \n row " << row  << " goes to cluster " << cluster_no << " with min dist " << minDist;
 		}
 		printCluster(new_cluster, 5);
 		
@@ -170,7 +185,7 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 			        // printf("  %d,%d - %f  ", *it1, i, mat[i]);
 			        new_centroid[col] += mat[i]; // adding all the features for all the vector in the cluster 
 			      }
-			     cout << endl;
+			     // cout << endl;
 				}
 			// cout << "Cluster size : " << cluster_size << endl;
 			// cout << "Beofre avging" << endl;
@@ -205,17 +220,21 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 		}
 
 		e++;
-		bool completeMatch = false;
+		
+		// printCluster(old_cluster, 5);
 		if(e != 0){
 			completeMatch = clustersMatch(old_cluster, new_cluster, 5);	
 		}
 		
 		cout << "completeMatch : " << completeMatch << endl;
+		
 		// old_cluster = new_cluster;
 		for(int i = 0; i < 5; i++){
 			old_cluster[i] = new_cluster[i];
 		}
-		cout << "Epoch ends" << endl;
+		// printCluster(old_cluster, 5);
+
+		cout << "Epoch " << e << " ends "  << endl;
 	}
 
 }
@@ -236,7 +255,7 @@ void try_list(){
 
 	list <int> listOfList2 [1] ;
 	
-	for(int i=0; i<5; i++){
+	for(int i=0; i<4; i++){
 		listOfList2[0].push_back(i);
 		listOfList2[0].push_front(i * 3);
 	}
@@ -251,6 +270,10 @@ void try_list(){
 	bool res = clustersMatch(listOfList, listOfList2, 1);
 
 	cout << "Amtch results : " <<res << endl; 
+
+	bool dinal  = listOfList == listOfList2;
+	cout << "Fianl results : " <<dinal << endl; 
+
 }
 
 
@@ -266,8 +289,6 @@ int main(int argc, char ** argv) {
   createData(NUM_ROWS, NUM_COLS, a);
   printMatrix(NUM_ROWS, NUM_COLS, a);
   K_Means_Pairwise(a, NUM_ROWS, NUM_COLS);
-
-  
   free(a);
   return 0;
 }
