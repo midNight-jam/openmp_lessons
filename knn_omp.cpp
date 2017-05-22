@@ -59,13 +59,16 @@ void printMatrix(int const num_rows, int num_cols,
 bool clustersMatch(list <int> lol_1 [], list <int> lol_2 [], int size){
 	cout << " size 1 : " << sizeof(lol_1);
 	cout << " size 2 : " << sizeof(lol_2);
-
+	bool match = true;
 	for(int i = 0; i < size; i++){
 		for(list <int> :: iterator it1 = lol_1[i].begin(), it2 = lol_2[i].begin(); it1 != lol_1[i].end() || it2 != lol_2[i].end(); ++it1, ++it2){
 				cout << " val 1 : " << *it1  << " val 2 : " << *it2 << endl;
+				if(*it1 != *it2){
+					match = false;
+				}
 			}		
 	}
-	return true;
+	return match;
 }
 
 float getPairwiseEuclideanDist(float * a, float * b, int size){
@@ -83,15 +86,17 @@ void printCluster(list <int> lol_1 [], int size){
 for(int i = 0; i < size; i++){
 		for(list <int> :: iterator it1 = lol_1[i].begin(); it1 != lol_1[i].end(); ++it1){
 				cout << "cluster : "<< i <<" val  : " << *it1  << endl;
-			}		
+			}
+			cout <<"--------------------" << endl;		
 	}
 }
 
+
 void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 	int e = 0;
-	list <int> old_cluster[5];
+	list <int>  old_cluster[5];
 
-	while(e < 3){ // epoch loop
+	while(e < 2){ // epoch loop
 		list <int> new_cluster[5];
 		
 		int center_indexes [5]; 
@@ -126,7 +131,7 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 		}
 		 
 		 
-		// for each point, calculate its distance with the centroids & keep track of closes centroid
+		// for each point, calculate its distance with the centroids & keep track of closest centroid
 		float data[5]; // as 5 cols, taking the values out in a seperate array for dist calculation purpose
 		float minDist;
 		int cluster_no = 0;
@@ -150,7 +155,66 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 			cout << " \n row " << row  << " goes to cluster " << cluster_no << " with min dist " << minDist;
 		}
 		printCluster(new_cluster, 5);
+		
+		//readjust the centroids as per the members of the cluster
+		cout << "Readjusting .... "  << endl;
+		for(int i = 0; i < 5; i++){
+			float new_centroid[5] = {};
+			int cluster_size = 0;
+			for(list <int> :: iterator it1 = new_cluster[i].begin(); it1 != new_cluster[i].end(); ++it1){
+				// cout << "cluster : "<< i <<" val  : " << *it1  << endl;
+				++cluster_size;
+			      
+			      for (int col = 0; col < num_cols; col++) {
+			        int i = col + *it1 * num_cols;
+			        // printf("  %d,%d - %f  ", *it1, i, mat[i]);
+			        new_centroid[col] += mat[i]; // adding all the features for all the vector in the cluster 
+			      }
+			     cout << endl;
+				}
+			// cout << "Cluster size : " << cluster_size << endl;
+			// cout << "Beofre avging" << endl;
+			// for(int i = 0; i<num_cols; i++){
+				// cout << " " << new_centroid[i];
+			// }
+			// cout << endl;
+			// cout << "after  avging" << endl;
+			// avergaing each feture for the new centroid
+			if(cluster_size > 0){
+				for(int i = 0; i<num_cols; i++){
+					new_centroid[i] = new_centroid[i] / cluster_size;
+					// cout << " " << new_centroid[i];
+				}
+			}
+
+
+			// cout << "\nB4 Readjusting " << endl;
+			// for(int j = 0; j < num_cols; j++){
+			// 	cout << " " << centeroids[i][j];
+			// }
+			// cout << endl;
+
+
+			// cout << "After  Readjusting " << endl;
+			for(int j = 0; j < num_cols; j++){
+				centeroids[i][j] = new_centroid[j];
+				// cout << " " << centeroids[i][j];
+			}
+			
+			// cout <<"\n--------------------" << endl;		
+		}
+
 		e++;
+		bool completeMatch = false;
+		if(e != 0){
+			completeMatch = clustersMatch(old_cluster, new_cluster, 5);	
+		}
+		
+		cout << "completeMatch : " << completeMatch << endl;
+		// old_cluster = new_cluster;
+		for(int i = 0; i < 5; i++){
+			old_cluster[i] = new_cluster[i];
+		}
 		cout << "Epoch ends" << endl;
 	}
 
@@ -188,8 +252,6 @@ void try_list(){
 
 	cout << "Amtch results : " <<res << endl; 
 }
-
-
 
 
 int main(int argc, char ** argv) {
