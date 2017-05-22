@@ -111,39 +111,37 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 	int e = 0;
 	list <int>  old_cluster[5];
 	bool completeMatch = false;
-	while(!completeMatch){ // epoch loop
+
+	int center_indexes [5]; 
+	random_device rd;
+	mt19937 eng(rd());
+	uniform_int_distribution<> distr(0,num_rows);
+	// selecting the random vectors as index
+	for(int n = 0; n < 5; n++){
+		center_indexes[n] = distr(eng); 
+	}
+	// sleecting 5 indexes as centroid , 5 cols are hard coded will remove
+	float centeroids[5][5];
+	// fetching the centroids data
+	for(int i = 0; i < 5; i++){
+		int row_num = center_indexes[i];
+		for(int j = 0; j < 5; j++){
+			centeroids[i][j] = mat[row_num*5 + j];
+		}
+	} 
+
+	// while(!completeMatch){ // epoch loop
+	while(e < 3){ // epoch loop
 		list <int> new_cluster[5];
-		
-		int center_indexes [5]; 
-		random_device rd;
-		mt19937 eng(rd());
-		uniform_int_distribution<> distr(0,num_rows);
-		// selecting the random vectors as index
-		for(int n = 0; n < 5; n++){
-			center_indexes[n] = distr(eng); 
-			cout << " no : " << center_indexes[n] ;
-		}
-		cout <<  endl;
-
-		// sleecting 5 indexes as centroid , 5 cols are hard coded will remove
-		float centeroids[5][5];
 
 
-		// fetching the centroids data
-		for(int i = 0; i < 5; i++){
-			int row_num = center_indexes[i];
-			for(int j = 0; j < 5; j++){
-				centeroids[i][j] = mat[row_num*5 + j];
-			}
-		} 
-
-		for(int i =0 ; i< 5; i++){
-			cout << " cent : ";
-			for(int j = 0; j < 5; j++){
-				cout  << " " << centeroids[i][j];
-			}
-			cout << endl;
-		}
+		// for(int i =0 ; i< 5; i++){
+		// 	cout << " cent : ";
+		// 	for(int j = 0; j < 5; j++){
+		// 		// cout  << " " << centeroids[i][j];
+		// 	}
+		// 	cout << endl;
+		// }
 		 
 		 
 		// for each point, calculate its distance with the centroids & keep track of closest centroid
@@ -157,7 +155,7 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 				data [col] = mat[index];
 			}
 			// got the data, now calculate distance 
-			cout << "\n-------------row : " << row << "-------------" <<endl;
+			// cout << "\n-------------row : " << row << "-------------" <<endl;
 			for(int i = 0; i < 5; i++){
 				float dist = getPairwiseEuclideanDist(data, centeroids[i], 5);
 				if(dist < minDist){
@@ -172,7 +170,7 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 		printCluster(new_cluster, 5);
 		
 		//readjust the centroids as per the members of the cluster
-		cout << "Readjusting .... "  << endl;
+		cout << "Readjusting ZZZZ.... "  << endl;
 		for(int i = 0; i < 5; i++){
 			float new_centroid[5] = {};
 			int cluster_size = 0;
@@ -203,20 +201,20 @@ void K_Means_Pairwise(float * mat, int num_rows, int num_cols){
 			}
 
 
-			// cout << "\nB4 Readjusting " << endl;
-			// for(int j = 0; j < num_cols; j++){
-			// 	cout << " " << centeroids[i][j];
-			// }
-			// cout << endl;
+			cout << "\nB4 Readjusting " << endl;
+			for(int j = 0; j < num_cols; j++){
+				cout << " " << centeroids[i][j];
+			}
+			cout << endl;
 
 
-			// cout << "After  Readjusting " << endl;
+			cout << "After  Readjusting " << endl;
 			for(int j = 0; j < num_cols; j++){
 				centeroids[i][j] = new_centroid[j];
-				// cout << " " << centeroids[i][j];
+				cout << " " << centeroids[i][j];
 			}
 			
-			// cout <<"\n--------------------" << endl;		
+			cout <<"\n--------------------" << endl;		
 		}
 
 		e++;
@@ -281,7 +279,7 @@ int main(int argc, char ** argv) {
   cout<<"Ready... for KNN OMP"<<endl;
   
   float *a;
-  int const NUM_ROWS = 10;
+  int const NUM_ROWS = 50;
   int const NUM_COLS = 5;
   int k = 5;
   size_t const N_BYTES = NUM_ROWS * NUM_COLS * sizeof(float);
